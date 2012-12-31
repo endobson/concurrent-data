@@ -91,6 +91,7 @@
   (require (prefix-in r: data/queue))
 
   (define N 6000000)
+  (collect-garbage)
   (let ((q (r:make-queue)))
     (time
       (for ((i (in-range N)))
