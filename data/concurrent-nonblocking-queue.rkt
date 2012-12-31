@@ -37,7 +37,6 @@
               (box-cas! tail-box next-box new-box)
               (loop))))))
 
-;;TODO figure out how to make this space safe and fast at the same time
 (define (dequeue! q (empty-fn (lambda () #f)))
   (let loop ()
     (let* ((head-box (queue-head q))
@@ -52,22 +51,6 @@
           (if (box-cas! head-box head-node-box (node-next-box next))
               (node-value next)
               (loop))))))
-#;
-(define (fast-dequeue! q (empty-fn (lambda () #f)))
-  (let loop ()
-    (let* ((head-box (queue-head q))
-           (head (unbox head-box))
-           (tail-box (queue-tail q))
-           (tail (unbox tail-box))
-           (next (unbox (node-next head))))
-      (if (eq? head tail)
-          (if next
-              (begin (box-cas! tail-box tail next) (loop))
-              (empty-fn))
-          (if (box-cas! head-box head next)
-              (node-value next)
-              (loop))))))
-
 
 (define (queue-length queue)
   (let loop ((count 0) (node (unbox (queue-head queue))))
@@ -84,7 +67,6 @@
   (in-producer dequeue! stop q (λ () stop)))
 
 
-
 (module+ comparison
   (require (prefix-in r: data/queue))
 
@@ -96,17 +78,6 @@
     (time
       (for ((i (in-range N)))
         (r:dequeue! q))))
-#; #;
-  (collect-garbage) 
-  (let ((q (make-queue)))
-    (time
-      (for ((i (in-range N)))
-        (enqueue! q #t)))
-    (time 
-      (for ((i (in-range N)))
-        (let loop ((v #f))
-          (unless v
-            (fast-dequeue! q))))))
 
   (collect-garbage) 
   (collect-garbage)
