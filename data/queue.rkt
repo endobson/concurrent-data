@@ -14,14 +14,14 @@
     (queue-length (queue? . -> . exact-nonnegative-integer?))
     (queue-empty? (queue? . -> . boolean?))))
 
-(struct queue (nodes head tail)
+(struct queue (head tail)
         #:property prop:sequence
         (λ (q) (queue->sequence q)))
 (struct node ((value #:mutable) next))
 
 (define (make-queue)
   (define new-node (node #f (box #f)))
-  (queue (box empty) (box new-node) (box new-node)))
+  (queue (box new-node) (box new-node)))
 
 
 (define (enqueue! q v)
