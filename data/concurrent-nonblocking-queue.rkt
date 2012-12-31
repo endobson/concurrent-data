@@ -4,7 +4,8 @@
   racket/list
   racket/contract)
 
-
+;Slow full contracts
+#;
 (provide
   (contract-out
     (queue? (any/c . -> . boolean?))
@@ -13,6 +14,25 @@
     (dequeue! ((queue?) ((-> any)) . ->* .  any))
     (queue-length (queue? . -> . exact-nonnegative-integer?))
     (queue-empty? (queue? . -> . boolean?))))
+
+;Fast contracts
+(provide
+  (contract-out
+    (queue? (any/c . -> . any))
+    (make-queue (-> any))
+    (enqueue! (queue? any/c . -> . any))
+    (dequeue! ((queue?) ((-> any)) . ->* .  any))
+    (queue-length (queue? . -> . any))
+    (queue-empty? (queue? . -> . any))))
+
+(module* unsafe #f
+  (provide
+    queue?
+    make-queue
+    enqueue!
+    dequeue!
+    queue-length
+    queue-empty?))
 
 (struct queue (head tail)
         #:property prop:sequence
@@ -34,7 +54,7 @@
       (if next 
           (begin (box-cas! tail-box next-box (node-next-box next)) (loop))
           (if (box-cas! next-box next new-node)
-              (box-cas! tail-box next-box new-box)
+              (void (box-cas! tail-box next-box new-box))
               (loop))))))
 
 (define (dequeue! q (empty-fn (lambda () #f)))
