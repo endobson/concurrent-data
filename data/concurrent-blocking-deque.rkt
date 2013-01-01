@@ -22,6 +22,24 @@
 
     (deque-length (deque? . -> . exact-nonnegative-integer?))))
 
+(module* unsafe #f
+  (provide
+    deque?
+    make-deque
+    enqueue!
+    enqueue-front!
+    dequeue!
+    dequeue-back!
+
+    try-enqueue!
+    try-enqueue-front!
+    try-dequeue!
+    try-dequeue-back!
+
+    deque-length))
+
+
+
 (struct deque (vector (start-index #:mutable) (size #:mutable) lock read-counter write-counter))
 
 (define (make-deque max-size)

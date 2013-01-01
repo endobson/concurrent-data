@@ -43,6 +43,7 @@
   (define the-box (box #f))
   (queue (box the-box) (box the-box)))
 
+(define void-v (void))
 
 (define (enqueue! q v)
   (define new-box (box #f))
@@ -54,7 +55,9 @@
       (if next 
           (begin (box-cas! tail-box next-box (node-next-box next)) (loop))
           (if (box-cas! next-box next new-node)
-              (void (box-cas! tail-box next-box new-box))
+              (begin
+                (box-cas! tail-box next-box new-box)
+                void-v)
               (loop))))))
 
 (define (dequeue! q (empty-fn (lambda () #f)))
