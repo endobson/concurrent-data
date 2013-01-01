@@ -21,7 +21,7 @@
     (queue? (any/c . -> . any))
     (make-queue (-> any))
     (enqueue! (queue? any/c . -> . any))
-    (dequeue! ((queue?) ((-> any)) . ->* .  any))
+    (try-dequeue! ((queue?) ((-> any)) . ->* .  any))
     (queue-length (queue? . -> . any))
     (queue-empty? (queue? . -> . any))))
 
@@ -30,7 +30,7 @@
     queue?
     make-queue
     enqueue!
-    dequeue!
+    try-dequeue!
     queue-length
     queue-empty?))
 
@@ -43,7 +43,6 @@
   (define the-box (box #f))
   (queue (box the-box) (box the-box)))
 
-(define void-v (void))
 
 (define (enqueue! q v)
   (define new-box (box #f))
@@ -57,10 +56,10 @@
           (if (box-cas! next-box next new-node)
               (begin
                 (box-cas! tail-box next-box new-box)
-                void-v)
+                (void))
               (loop))))))
 
-(define (dequeue! q (empty-fn (lambda () #f)))
+(define (try-dequeue! q (empty-fn (lambda () #f)))
   (let loop ()
     (let* ((head-box (queue-head q))
            (head-node-box (unbox head-box))
@@ -87,7 +86,7 @@
 
 (define (queue->sequence q)
   (define stop (gensym 'stop))
-  (in-producer dequeue! stop q (λ () stop)))
+  (in-producer try-dequeue! stop q (λ () stop)))
 
 
 (module+ comparison
@@ -113,6 +112,6 @@
       (for ((i (in-range N)))
         (let loop ((v #f))
           (unless v
-            (dequeue! q)))))))
+            (loop (try-dequeue! q))))))))
 
 

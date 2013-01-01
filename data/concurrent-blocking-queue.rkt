@@ -48,7 +48,7 @@
   (fsemaphore-post (queue-sema q)))
 
 (define (inner-dequeue! q)
-  (nb:dequeue! (queue-inner q)
+  (nb:try-dequeue! (queue-inner q)
     (lambda () (error 'conncurrent-blocking-queue "Corrupt queue."))))
 
 (define (dequeue! q)
