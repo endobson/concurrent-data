@@ -8,7 +8,7 @@
     (mvar-put (mvar? any/c . -> . any))
     (mvar-get (mvar? . -> . any))
     (mvar-swap (mvar? any/c . -> . any))
-    (mvar-try-put ((mvar? any/c) ((-> any)) . ->* . any))
+    (mvar-try-put (mvar? any/c . -> . any))
     (mvar-try-get ((mvar?) ((-> any)) . ->* . any))
     (mvar-try-swap ((mvar? any/c) ((-> any)) . ->* . any))
     (mvar-put-evt (mvar? any/c . -> . any))
@@ -85,11 +85,12 @@
     (semaphore-wait (mvar-write-sema mv))
     (inner-put mv v)))
 
-(define (mvar-try-put mv v (full-fn (lambda () #f)))
+(define (mvar-try-put mv v)
   (parameterize-break #f
-    (if (semaphore-try-wait? (mvar-write-sema mv))
-        (inner-put mv v)
-        (full-fn))))
+    (and
+      (semaphore-try-wait? (mvar-write-sema mv))
+      (inner-put mv v)
+      #t)))
 
 (define (mvar-get mv)
   (parameterize-break #f
